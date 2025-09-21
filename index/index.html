@@ -1,0 +1,3603 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --info-color: #0ea5e9;
+            --whatsapp-color: #25d366;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --sidebar-width: 250px;
+        }
+
+        [dir="rtl"] {
+            font-family: 'Arial', 'Tahoma', sans-serif;
+        }
+
+        [dir="ltr"] {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+
+        /* Login Screen Styles */
+        .login-container {
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+
+        .login-language-selector {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            z-index: 100;
+        }
+
+        [dir="rtl"] .login-language-selector {
+            right: auto;
+            left: 2rem;
+        }
+
+        .language-dropdown {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+        }
+
+        .login-card {
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo {
+            width: 64px;
+            height: 64px;
+            background: var(--primary-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+
+        .login-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Cloud Status Indicator */
+        .cloud-status {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            backdrop-filter: blur(10px);
+        }
+
+        [dir="rtl"] .cloud-status {
+            left: auto;
+            right: 2rem;
+        }
+
+        .cloud-status.connected {
+            color: var(--success-color);
+        }
+
+        .cloud-status.disconnected {
+            color: var(--danger-color);
+        }
+
+        .cloud-status.syncing {
+            color: var(--warning-color);
+        }
+
+        /* Auth Toggle */
+        .auth-toggle {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            padding: 0.25rem;
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+
+        .auth-toggle-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .auth-toggle-btn.active {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-form {
+            display: block;
+        }
+
+        .auth-form.hidden {
+            display: none;
+        }
+
+        .forgot-password-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .forgot-password-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .forgot-password-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Email Verification Styles */
+        .verification-info {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: var(--info-color);
+        }
+
+        .verification-code {
+            font-weight: bold;
+            font-size: 1.125rem;
+            color: var(--primary-color);
+            text-align: center;
+            padding: 0.5rem;
+            background: #dbeafe;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+
+        .email-step {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .email-icon {
+            width: 80px;
+            height: 80px;
+            background: #f0f9ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .step-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* App Container */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            padding: 1rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        [dir="rtl"] .sidebar {
+            border-right: none;
+            border-left: 1px solid var(--border-color);
+            right: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* User Info */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 0.875rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+        }
+
+        [dir="rtl"] .main-content {
+            margin-left: 0;
+            margin-right: var(--sidebar-width);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-whatsapp {
+            background: var(--whatsapp-color);
+            color: white;
+        }
+
+        .btn-whatsapp:hover {
+            background: #1da851;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        /* Order Number Generator */
+        .order-number-section {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .order-number-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .generated-number {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-family: monospace;
+        }
+
+        .generate-btn {
+            background: var(--info-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .form-label.required::after {
+            content: ' *';
+            color: var(--danger-color);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        [dir="rtl"] .form-actions {
+            justify-content: flex-start;
+        }
+
+        /* Tables */
+        .table-container {
+            background: var(--card-background);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        [dir="rtl"] .table th,
+        [dir="rtl"] .table td {
+            text-align: right;
+        }
+
+        .table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            color: var(--text-secondary);
+        }
+
+        .table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            margin-right: 0.25rem;
+            transition: all 0.2s;
+        }
+
+        .action-btn.edit {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .action-btn.view {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .action-btn.whatsapp {
+            background: var(--whatsapp-color);
+            color: white;
+        }
+
+        /* Enhanced Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Payment Status Badges */
+        .badge-paid {
+            background-color: #dcfce7;
+            color: var(--success-color);
+        }
+
+        .badge-pending {
+            background-color: #fef3c7;
+            color: var(--warning-color);
+        }
+
+        .badge-partial {
+            background-color: #e0f2fe;
+            color: var(--info-color);
+        }
+
+        .badge-unpaid {
+            background-color: #fee2e2;
+            color: var(--danger-color);
+        }
+
+        /* Order Status Badges */
+        .badge-completed {
+            background-color: #dcfce7;
+            color: var(--success-color);
+        }
+
+        .badge-inprogress {
+            background-color: #fef3c7;
+            color: var(--warning-color);
+        }
+
+        .badge-cancelled {
+            background-color: #fee2e2;
+            color: var(--danger-color);
+        }
+
+        /* Shipping Method Badges */
+        .badge-standard {
+            background-color: #f1f5f9;
+            color: var(--secondary-color);
+        }
+
+        .badge-express {
+            background-color: #fef3c7;
+            color: var(--warning-color);
+        }
+
+        .badge-overnight {
+            background-color: #fee2e2;
+            color: var(--danger-color);
+        }
+
+        .badge-pickup {
+            background-color: #dcfce7;
+            color: var(--success-color);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Hide sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            border: 1px solid #059669;
+            color: #059669;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            border: 1px solid #dc2626;
+            color: #dc2626;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            [dir="rtl"] .main-content {
+                margin-right: 0;
+            }
+
+            .form-grid-2,
+            .form-grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .login-card {
+                margin: 1rem;
+                padding: 2rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1rem;
+            }
+
+            .cloud-status {
+                top: 1rem;
+                left: 1rem;
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+
+            [dir="rtl"] .cloud-status {
+                left: auto;
+                right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner hidden">
+        <div style="text-align: center;">
+            <div class="spinner"></div>
+            <div class="loading-text" data-key="loading">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <!-- Cloud Status Indicator -->
+        <div class="cloud-status connected" id="cloudStatus">
+            <span>☁️</span>
+            <span data-key="cloudConnected">Cloud Connected</span>
+        </div>
+
+        <div class="login-language-selector">
+            <select class="language-dropdown" id="loginLanguageSelect">
+                <option value="en">🇺🇸 English</option>
+                <option value="ar">🇸🇦 العربية</option>
+                <option value="pl">🇵🇱 Polski</option>
+            </select>
+        </div>
+
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">SM</div>
+                <h1 class="login-title" data-key="appName">Store Manager</h1>
+                <p class="login-subtitle" data-key="loginSubtitle">Access your data from anywhere</p>
+            </div>
+
+            <!-- Auth Toggle -->
+            <div class="auth-toggle">
+                <button type="button" class="auth-toggle-btn active" onclick="toggleAuthMode('login')" data-key="login">Login</button>
+                <button type="button" class="auth-toggle-btn" onclick="toggleAuthMode('register')" data-key="register">Register</button>
+                <button type="button" class="auth-toggle-btn" onclick="toggleAuthMode('forgot')" data-key="forgotPassword">Forgot Password</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <div class="form-group">
+                    <label class="form-label required" data-key="emailOrUsername">Email or Username</label>
+                    <input type="text" class="form-input" name="emailOrUsername" required placeholder="Enter email or username...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label required" data-key="password">Password</label>
+                    <input type="password" class="form-input" name="password" required placeholder="Enter password...">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-key="loginBtn">Login</button>
+                <div class="forgot-password-link">
+                    <a onclick="toggleAuthMode('forgot')" data-key="forgotPasswordLink">Forgot your password?</a>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form hidden">
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label required" data-key="fullName">Full Name</label>
+                        <input type="text" class="form-input" name="fullName" required placeholder="Enter full name...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" data-key="username">Username</label>
+                        <input type="text" class="form-input" name="username" required placeholder="Choose username...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label required" data-key="email">Email Address</label>
+                    <input type="email" class="form-input" name="email" required placeholder="Enter email address...">
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label required" data-key="password">Password</label>
+                        <input type="password" class="form-input" name="password" required placeholder="Create password..." minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" data-key="confirmPassword">Confirm Password</label>
+                        <input type="password" class="form-input" name="confirmPassword" required placeholder="Confirm password...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label required" data-key="companyName">Company/Store Name</label>
+                    <input type="text" class="form-input" name="companyName" required placeholder="Enter your company or store name...">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-key="registerBtn">Create Account</button>
+            </form>
+
+            <!-- Forgot Password Form -->
+            <form id="forgotPasswordForm" class="auth-form hidden">
+                <div id="emailStep">
+                    <div class="email-step">
+                        <div class="email-icon">📧</div>
+                        <h3 class="step-title" data-key="resetPasswordTitle">Reset Your Password</h3>
+                        <p class="step-description" data-key="resetPasswordDesc">Enter your email address and we'll send you a verification code</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required" data-key="email">Email Address</label>
+                        <input type="email" class="form-input" name="resetEmail" required placeholder="Enter your email address...">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="toggleAuthMode('login')" data-key="backToLogin">Back to Login</button>
+                        <button type="button" class="btn btn-primary" onclick="sendVerificationCode()" data-key="sendCode">Send Code</button>
+                    </div>
+                </div>
+
+                <div id="verificationStep" class="hidden">
+                    <div class="verification-info">
+                        <strong data-key="verificationSent">Verification code sent!</strong>
+                        <p data-key="checkEmail">Please check your email for the verification code.</p>
+                        <div class="verification-code" id="displayedCode">123456</div>
+                        <small data-key="simulatedEmail">* This is a simulation - use the code above</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required" data-key="verificationCode">Verification Code</label>
+                        <input type="text" class="form-input" name="verificationCode" required placeholder="Enter 6-digit code..." maxlength="6">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="backToEmailStep()" data-key="backToEmail">Back</button>
+                        <button type="button" class="btn btn-primary" onclick="verifyCode()" data-key="verifyCode">Verify Code</button>
+                    </div>
+                </div>
+
+                <div id="resetStep" class="hidden">
+                    <div class="email-step">
+                        <div class="email-icon">🔐</div>
+                        <h3 class="step-title" data-key="createNewPassword">Create New Password</h3>
+                        <p class="step-description" data-key="newPasswordDesc">Enter your new password below</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required" data-key="newPassword">New Password</label>
+                        <input type="password" class="form-input" name="newPassword" required placeholder="Enter new password..." minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" data-key="confirmNewPassword">Confirm New Password</label>
+                        <input type="password" class="form-input" name="confirmNewPassword" required placeholder="Confirm new password...">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" onclick="resetPassword()" style="width: 100%; justify-content: center;" data-key="resetPassword">Reset Password</button>
+                    </div>
+                </div>
+            </form>
+
+            <div id="authMessage" class="alert" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="appContainer" class="app-container hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">SM</div>
+                <span class="logo-text" data-key="appName">Store Manager</span>
+            </div>
+
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Admin</div>
+                    <div class="user-role" id="userRole">Administrator</div>
+                    <div style="font-size: 0.7rem; color: var(--info-color);" id="companyName">Company Name</div>
+                </div>
+                <button class="logout-btn" onclick="logout()" data-key="logout">Logout</button>
+            </div>
+
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="dashboard" onclick="showSection('dashboard')">
+                            <span>📊</span>
+                            <span data-key="dashboard">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="orders" onclick="showSection('orders')">
+                            <span>🛒</span>
+                            <span data-key="orders">Orders</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="products" onclick="showSection('products')">
+                            <span>📦</span>
+                            <span data-key="products">Products</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="customers" onclick="showSection('customers')">
+                            <span>👥</span>
+                            <span data-key="customers">Customers</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <!-- Cloud Sync Status -->
+                <div style="background: #f0f9ff; border: 1px solid var(--info-color); border-radius: 6px; padding: 0.5rem; margin-bottom: 1rem; text-align: center; font-size: 0.75rem; color: var(--info-color);">
+                    <div id="syncStatus">☁️ <span data-key="synced">Synced to Cloud</span></div>
+                    <div style="font-size: 0.7rem; margin-top: 0.25rem;" data-key="accessAnywhere">Access from any device</div>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-size: 0.75rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 0.5rem; display: block;" data-key="language">Language</label>
+                    <select style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 6px; background: white; font-size: 0.875rem;" id="languageSelect">
+                        <option value="en">🇺🇸 English</option>
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="pl">🇵🇱 Polski</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 0.75rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 0.5rem; display: block;" data-key="currency">Currency</label>
+                    <select style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 6px; background: white; font-size: 0.875rem;" id="currencySelect">
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="PLN">PLN (zł)</option>
+                    </select>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard -->
+            <section id="dashboard" class="section active">
+                <div class="header">
+                    <h1 class="page-title" data-key="dashboard">Dashboard</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-success" onclick="exportAllData()" data-key="exportAll">📊 Export All Data</button>
+                        <button class="btn btn-whatsapp" onclick="openWhatsAppModal('dashboard')" data-key="shareWhatsApp">📱 Share on WhatsApp</button>
+                        <button class="btn btn-primary" onclick="openOrderModal()">
+                            <span>+</span>
+                            <span data-key="newOrder">New Order</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: white; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="color: var(--text-secondary); font-size: 0.875rem; font-weight: 500;" data-key="totalOrders">Total Orders</span>
+                            <div style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background-color: #dbeafe; color: #2563eb;">🛒</div>
+                        </div>
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);" id="totalOrdersCount">0</div>
+                    </div>
+
+                    <div style="background: white; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="color: var(--text-secondary); font-size: 0.875rem; font-weight: 500;" data-key="totalRevenue">Total Revenue</span>
+                            <div style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background-color: #dcfce7; color: #059669;">💰</div>
+                        </div>
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);" id="totalRevenueAmount">$0.00</div>
+                    </div>
+
+                    <div style="background: white; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="color: var(--text-secondary); font-size: 0.875rem; font-weight: 500;" data-key="totalProducts">Total Products</span>
+                            <div style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background-color: #fef3c7; color: #d97706;">📦</div>
+                        </div>
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);" id="totalProductsCount">0</div>
+                    </div>
+
+                    <div style="background: white; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="color: var(--text-secondary); font-size: 0.875rem; font-weight: 500;" data-key="totalCustomers">Total Customers</span>
+                            <div style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background-color: #f3e8ff; color: #7c3aed;">👥</div>
+                        </div>
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);" id="totalCustomersCount">0</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2 class="table-title" data-key="recentOrders">Recent Orders</h2>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-success" onclick="exportOrders()" data-key="exportOrders">📄 Export</button>
+                            <button class="btn btn-whatsapp" onclick="openWhatsAppModal('orders')" data-key="shareOnWhatsApp">📱 Share</button>
+                        </div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th data-key="orderNumber">Order Number</th>
+                                <th data-key="customer">Customer</th>
+                                <th data-key="total">Total</th>
+                                <th data-key="paymentStatus">Payment</th>
+                                <th data-key="orderStatus">Status</th>
+                                <th data-key="shippingMethod">Shipping</th>
+                                <th data-key="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardOrdersTable">
+                            <tr><td colspan="7" style="text-align: center; color: var(--text-secondary);">No orders yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Orders -->
+            <section id="orders" class="section">
+                <div class="header">
+                    <h1 class="page-title" data-key="orders">Orders</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-success" onclick="exportOrders()" data-key="exportOrders">📄 Export</button>
+                        <button class="btn btn-whatsapp" onclick="openWhatsAppModal('orders')" data-key="shareOnWhatsApp">📱 Share</button>
+                        <button class="btn btn-primary" onclick="openOrderModal()">
+                            <span>+</span>
+                            <span data-key="addOrder">Add Order</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2 class="table-title" data-key="allOrders">All Orders</h2>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th data-key="orderNumber">Order Number</th>
+                                <th data-key="customer">Customer</th>
+                                <th data-key="product">Product</th>
+                                <th data-key="total">Total</th>
+                                <th data-key="paymentStatus">Payment</th>
+                                <th data-key="orderStatus">Status</th>
+                                <th data-key="shippingMethod">Shipping</th>
+                                <th data-key="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <!-- Orders loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Products -->
+            <section id="products" class="section">
+                <div class="header">
+                    <h1 class="page-title" data-key="products">Products</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-success" onclick="exportProducts()" data-key="exportProducts">📄 Export</button>
+                        <button class="btn btn-whatsapp" onclick="openWhatsAppModal('products')" data-key="shareOnWhatsApp">📱 Share</button>
+                        <button class="btn btn-primary" onclick="openProductModal()">
+                            <span>+</span>
+                            <span data-key="addProduct">Add Product</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2 class="table-title" data-key="allProducts">All Products</h2>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th data-key="productName">Product Name</th>
+                                <th data-key="category">Category</th>
+                                <th data-key="price">Price</th>
+                                <th data-key="stock">Stock</th>
+                                <th data-key="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTable">
+                            <!-- Products loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Customers -->
+            <section id="customers" class="section">
+                <div class="header">
+                    <h1 class="page-title" data-key="customers">Customers</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-success" onclick="exportCustomers()" data-key="exportCustomers">📄 Export</button>
+                        <button class="btn btn-whatsapp" onclick="openWhatsAppModal('customers')" data-key="shareOnWhatsApp">📱 Share</button>
+                        <button class="btn btn-primary" onclick="openCustomerModal()">
+                            <span>+</span>
+                            <span data-key="addCustomer">Add Customer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2 class="table-title" data-key="allCustomers">All Customers</h2>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th data-key="customerName">Customer Name</th>
+                                <th data-key="email">Email</th>
+                                <th data-key="phone">Phone</th>
+                                <th data-key="city">City</th>
+                                <th data-key="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTable">
+                            <!-- Customers loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Enhanced Order Modal with Shipping Method -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" data-key="addOrder">Add Order</h2>
+                <button class="modal-close" onclick="closeModal('orderModal')">&times;</button>
+            </div>
+            <form id="orderForm">
+                <!-- Order Number Section -->
+                <div class="order-number-section">
+                    <div class="order-number-header">
+                        <span style="font-weight: 600; color: var(--info-color);" data-key="orderNumber">Order Number:</span>
+                        <button type="button" class="generate-btn" onclick="generateOrderNumber()" data-key="generateNew">Generate New</button>
+                    </div>
+                    <div class="generated-number" id="currentOrderNumber">ORD-001</div>
+                </div>
+
+                <!-- Order Number Input -->
+                <div class="form-group">
+                    <label class="form-label required" data-key="orderNumber">Order Number</label>
+                    <input type="text" class="form-input" name="orderNumber" required placeholder="Enter order number..." value="ORD-001">
+                </div>
+
+                <!-- Customer & Product Information -->
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label required" data-key="customerName">Customer Name</label>
+                        <input type="text" class="form-input" name="customerName" required placeholder="Enter customer name...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" data-key="productName">Product Name</label>
+                        <input type="text" class="form-input" name="productName" required placeholder="Enter product name...">
+                    </div>
+                </div>
+
+                <!-- Price & Currency -->
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label required" data-key="price">Total Price</label>
+                        <input type="number" class="form-input" name="price" step="0.01" required placeholder="0.00" onchange="calculatePayment()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" data-key="currency">Currency</label>
+                        <select class="form-select" name="currency" required onchange="updateFormCurrency()">
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="PLN">PLN (zł)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="form-grid-3">
+                    <div class="form-group">
+                        <label class="form-label required" data-key="paymentStatus">Payment Status</label>
+                        <select class="form-select" name="paymentStatus" required onchange="handlePaymentStatusChange()">
+                            <option value="paid" data-key="paid">Paid</option>
+                            <option value="pending" data-key="paymentPending">Payment Pending</option>
+                            <option value="partial" data-key="partialPayment">Partial Payment</option>
+                            <option value="unpaid" data-key="unpaid">Unpaid</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-key="paidAmount">Paid Amount</label>
+                        <input type="number" class="form-input" name="paidAmount" step="0.01" min="0" value="0" onchange="calculateRemaining()" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-key="remainingAmount">Remaining Amount</label>
+                        <input type="number" class="form-input" name="remainingAmount" step="0.01" min="0" value="0" readonly placeholder="0.00">
+                    </div>
+                </div>
+
+                <!-- Order Status & Shipping Method -->
+                <div class="form-grid-3">
+                    <div class="form-group">
+                        <label class="form-label required" data-key="orderStatus">Order Status</label>
+                        <select class="form-select" name="orderStatus" required>
+                            <option value="completed" data-key="completed">Completed</option>
+                            <option value="inprogress" data-key="inProgress">In Progress</option>
+  <option value="ready" data-key="ready">Ready to send</option>
+                          <option value="cancelled" data-key="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" data-key="shippingMethod">Shipping Method</label>
+                        <select class="form-select" name="shippingMethod" required>
+                            <option value="standard" data-key="standardShipping">Standard Shipping</option>
+                            <option value="express" data-key="expressShipping">Express Shipping</option>
+                            <option value="overnight" data-key="overnightShipping">Overnight Shipping</option>
+                            <option value="pickup" data-key="pickupShipping">Store Pickup</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-key="orderDate">Order Date</label>
+                        <input type="date" class="form-input" name="orderDate" value="">
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-group">
+                    <label class="form-label" data-key="orderNotes">Order Notes</label>
+                    <textarea class="form-textarea" name="orderNotes" placeholder="Add any notes about this order..." style="resize: vertical; min-height: 80px;"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('orderModal')" data-key="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-key="createOrder">Create Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" data-key="addProduct">Add Product</h2>
+                <button class="modal-close" onclick="closeModal('productModal')">&times;</button>
+            </div>
+            <form id="productForm">
+                <div class="form-group">
+                    <label class="form-label required" data-key="productName">Product Name</label>
+                    <input type="text" class="form-input" name="productName" required>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label required" data-key="category">Category</label>
+                        <input type="text" class="form-input" name="category" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" data-key="price">Price</label>
+                        <input type="number" class="form-input" name="price" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label required" data-key="stock">Stock</label>
+                        <input type="number" class="form-input" name="stock" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" data-key="currency">Currency</label>
+                        <select class="form-select" name="currency" required>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="PLN">PLN (zł)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-key="description">Description</label>
+                    <textarea class="form-textarea" name="description" placeholder="Product description..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('productModal')" data-key="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-key="save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Customer Modal -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" data-key="addCustomer">Add Customer</h2>
+                <button class="modal-close" onclick="closeModal('customerModal')">&times;</button>
+            </div>
+            <form id="customerForm">
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label required" data-key="customerName">Customer Name</label>
+                        <input type="text" class="form-input" name="customerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" data-key="phone">Phone</label>
+                        <input type="tel" class="form-input" name="phone" required>
+                    </div>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label required" data-key="email">Email</label>
+                        <input type="email" class="form-input" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-key="city">City</label>
+                        <input type="text" class="form-input" name="city">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-key="address">Address</label>
+                    <textarea class="form-textarea" name="address" placeholder="Enter customer address..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('customerModal')" data-key="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-key="save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- WhatsApp Modal -->
+    <div id="whatsappModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 style="color: var(--whatsapp-color);">📱 <span data-key="shareWhatsApp">Share on WhatsApp</span></h2>
+                <button class="modal-close" onclick="closeModal('whatsappModal')">&times;</button>
+            </div>
+            <form id="whatsappForm">
+                <div class="form-group">
+                    <label class="form-label required" data-key="phoneNumber">Phone Number</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <select class="form-select" name="countryCode" style="width: 80px; flex-shrink: 0;">
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+966">🇸🇦 +966</option>
+                            <option value="+48">🇵🇱 +48</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+49">🇩🇪 +49</option>
+                        </select>
+                        <input type="tel" class="form-input" name="phoneNumber" required placeholder="Enter phone number...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-key="customMessage">Custom Message (Optional)</label>
+                    <textarea class="form-textarea" name="customMessage" placeholder="Add a personal message..." onkeyup="updateWhatsAppPreview()" style="resize: vertical; min-height: 80px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-key="messagePreview">Message Preview:</label>
+                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; font-size: 0.875rem; color: var(--text-secondary); white-space: pre-wrap; min-height: 150px;" id="messagePreview">
+                        <!-- Message preview will be shown here -->
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('whatsappModal')" data-key="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-whatsapp" data-key="sendWhatsApp">📱 Send WhatsApp</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7Z8xKc2q_simulator_key_for_demo",
+            authDomain: "store-manager-demo.firebaseapp.com",
+            projectId: "store-manager-demo",
+            storageBucket: "store-manager-demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:demo_app_id"
+        };
+
+        // Initialize Firebase (using demo configuration)
+        let db, auth;
+        let isCloudConnected = false;
+
+        try {
+            // For demo purposes, we'll simulate Firebase
+            db = {
+                collection: (path) => ({
+                    doc: (id) => ({
+                        set: async (data) => {
+                            await simulateNetworkDelay();
+                            setCloudStatus('syncing');
+                            localStorage.setItem(`firebase_${path}_${id}`, JSON.stringify(data));
+                            setCloudStatus('connected');
+                            return { success: true };
+                        },
+                        get: async () => {
+                            await simulateNetworkDelay();
+                            const data = localStorage.getItem(`firebase_${path}_${id}`);
+                            return {
+                                exists: !!data,
+                                data: () => data ? JSON.parse(data) : null
+                            };
+                        },
+                        update: async (data) => {
+                            await simulateNetworkDelay();
+                            setCloudStatus('syncing');
+                            const existing = localStorage.getItem(`firebase_${path}_${id}`);
+                            const updated = { ...JSON.parse(existing || '{}'), ...data };
+                            localStorage.setItem(`firebase_${path}_${id}`, JSON.stringify(updated));
+                            setCloudStatus('connected');
+                            return { success: true };
+                        },
+                        delete: async () => {
+                            await simulateNetworkDelay();
+                            setCloudStatus('syncing');
+                            localStorage.removeItem(`firebase_${path}_${id}`);
+                            setCloudStatus('connected');
+                            return { success: true };
+                        }
+                    }),
+                    get: async () => {
+                        await simulateNetworkDelay();
+                        const results = [];
+                        for (let i = 0; i < localStorage.length; i++) {
+                            const key = localStorage.key(i);
+                            if (key && key.startsWith(`firebase_${path}_`)) {
+                                const data = JSON.parse(localStorage.getItem(key));
+                                const id = key.replace(`firebase_${path}_`, '');
+                                results.push({
+                                    id: id,
+                                    data: () => data
+                                });
+                            }
+                        }
+                        return {
+                            docs: results
+                        };
+                    },
+                    add: async (data) => {
+                        await simulateNetworkDelay();
+                        setCloudStatus('syncing');
+                        const id = 'doc_' + Math.random().toString(36).substr(2, 9);
+                        localStorage.setItem(`firebase_${path}_${id}`, JSON.stringify({ ...data, id }));
+                        setCloudStatus('connected');
+                        return { id, success: true };
+                    }
+                })
+            };
+            
+            isCloudConnected = true;
+            setCloudStatus('connected');
+        } catch (error) {
+            console.error('Cloud connection failed:', error);
+            isCloudConnected = false;
+            setCloudStatus('disconnected');
+        }
+
+        // Simulate network delay for realistic feel
+        function simulateNetworkDelay() {
+            return new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 700));
+        }
+
+        // Cloud status management
+        function setCloudStatus(status) {
+            const statusElement = document.getElementById('cloudStatus');
+            const syncStatusElement = document.getElementById('syncStatus');
+            
+            statusElement.className = `cloud-status ${status}`;
+            
+            switch (status) {
+                case 'connected':
+                    statusElement.innerHTML = '<span>☁️</span><span data-key="cloudConnected">Cloud Connected</span>';
+                    if (syncStatusElement) {
+                        syncStatusElement.innerHTML = '☁️ <span data-key="synced">Synced to Cloud</span>';
+                    }
+                    break;
+                case 'syncing':
+                    statusElement.innerHTML = '<span>🔄</span><span data-key="syncing">Syncing...</span>';
+                    if (syncStatusElement) {
+                        syncStatusElement.innerHTML = '🔄 <span data-key="syncing">Syncing...</span>';
+                    }
+                    break;
+                case 'disconnected':
+                    statusElement.innerHTML = '<span>❌</span><span data-key="offline">Offline Mode</span>';
+                    if (syncStatusElement) {
+                        syncStatusElement.innerHTML = '❌ <span data-key="offline">Offline Mode</span>';
+                    }
+                    break;
+            }
+        }
+
+        function showLoading(message = 'Loading...') {
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            document.querySelector('.loading-text').textContent = message;
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').classList.add('hidden');
+        }
+
+        // Currency exchange rates (updated with real approximate rates)
+        const exchangeRates = {
+            USD: { EUR: 0.92, PLN: 4.02, USD: 1.00 },
+            EUR: { USD: 1.09, PLN: 4.37, EUR: 1.00 },
+            PLN: { USD: 0.25, EUR: 0.23, PLN: 1.00 }
+        };
+
+        // Currency symbols
+        const currencySymbols = {
+            USD: '$',
+            EUR: '€',
+            PLN: 'zł'
+        };
+
+        // Enhanced translations with cloud features
+        const translations = {
+            en: {
+                appName: "Store Manager",
+                loginSubtitle: "Access your data from anywhere",
+                loading: "Loading...",
+                cloudConnected: "Cloud Connected",
+                syncing: "Syncing...",
+                offline: "Offline Mode",
+                synced: "Synced to Cloud",
+                accessAnywhere: "Access from any device",
+                login: "Login",
+                register: "Register",
+                forgotPassword: "Forgot Password",
+                emailOrUsername: "Email or Username",
+                username: "Username",
+                password: "Password",
+                fullName: "Full Name",
+                email: "Email Address",
+                confirmPassword: "Confirm Password",
+                companyName: "Company/Store Name",
+                loginBtn: "Login",
+                registerBtn: "Create Account",
+                logout: "Logout",
+                forgotPasswordLink: "Forgot your password?",
+                resetPasswordTitle: "Reset Your Password",
+                resetPasswordDesc: "Enter your email address and we'll send you a verification code",
+                sendCode: "Send Code",
+                backToLogin: "Back to Login",
+                verificationSent: "Verification code sent!",
+                checkEmail: "Please check your email for the verification code.",
+                simulatedEmail: "* This is a simulation - use the code above",
+                verificationCode: "Verification Code",
+                verifyCode: "Verify Code",
+                backToEmail: "Back",
+                createNewPassword: "Create New Password",
+                newPasswordDesc: "Enter your new password below",
+                newPassword: "New Password",
+                confirmNewPassword: "Confirm New Password",
+                resetPassword: "Reset Password",
+                dashboard: "Dashboard",
+                orders: "Orders",
+                products: "Products",
+                customers: "Customers",
+                language: "Language",
+                currency: "Currency",
+                newOrder: "New Order",
+                addOrder: "Add Order",
+                editOrder: "Edit Order",
+                addProduct: "Add Product",
+                editProduct: "Edit Product",
+                addCustomer: "Add Customer",
+                editCustomer: "Edit Customer",
+                allOrders: "All Orders",
+                allProducts: "All Products",
+                allCustomers: "All Customers",
+                totalOrders: "Total Orders",
+                totalRevenue: "Total Revenue",
+                totalProducts: "Total Products",
+                totalCustomers: "Total Customers",
+                recentOrders: "Recent Orders",
+                orderNumber: "Order Number",
+                generateNew: "Generate New",
+                customer: "Customer",
+                product: "Product",
+                total: "Total",
+                actions: "Actions",
+                productName: "Product Name",
+                category: "Category",
+                price: "Price",
+                stock: "Stock",
+                description: "Description",
+                customerName: "Customer Name",
+                phone: "Phone",
+                city: "City",
+                address: "Address",
+                save: "Save",
+                update: "Update",
+                cancel: "Cancel",
+                edit: "Edit",
+                delete: "Delete",
+                view: "View",
+                createOrder: "Create Order",
+                updateOrder: "Update Order",
+                orderDate: "Order Date",
+                orderNotes: "Order Notes",
+                paymentStatus: "Payment Status",
+                paid: "Paid",
+                paymentPending: "Payment Pending",
+                partialPayment: "Partial Payment",
+                unpaid: "Unpaid",
+                paidAmount: "Paid Amount",
+                remainingAmount: "Remaining Amount",
+                orderStatus: "Order Status",
+                completed: "Completed",
+                inProgress: "In Progress",
+                cancelled: "Cancelled",
+                shippingMethod: "Shipping Method",
+                standardShipping: "Standard Shipping",
+                expressShipping: "Express Shipping",
+                overnightShipping: "Overnight Shipping",
+                pickupShipping: "Store Pickup",
+                exportAll: "Export All Data",
+                exportOrders: "Export Orders",
+                exportProducts: "Export Products",
+                exportCustomers: "Export Customers",
+                shareWhatsApp: "Share on WhatsApp",
+                shareOnWhatsApp: "Share",
+                phoneNumber: "Phone Number",
+                customMessage: "Custom Message",
+                messagePreview: "Message Preview",
+                sendWhatsApp: "Send WhatsApp"
+            },
+            ar: {
+                appName: "مدير المتجر",
+                loginSubtitle: "الوصول إلى بياناتك من أي مكان",
+                loading: "جاري التحميل...",
+                cloudConnected: "متصل بالسحابة",
+                syncing: "جاري المزامنة...",
+                offline: "وضع عدم الاتصال",
+                synced: "تمت المزامنة مع السحابة",
+                accessAnywhere: "الوصول من أي جهاز",
+                login: "تسجيل الدخول",
+                register: "إنشاء حساب",
+                forgotPassword: "نسيت كلمة المرور",
+                emailOrUsername: "البريد الإلكتروني أو اسم المستخدم",
+                username: "اسم المستخدم",
+                password: "كلمة المرور",
+                fullName: "الاسم الكامل",
+                email: "البريد الإلكتروني",
+                confirmPassword: "تأكيد كلمة المرور",
+                companyName: "اسم الشركة/المتجر",
+                loginBtn: "دخول",
+                registerBtn: "إنشاء حساب",
+                logout: "خروج",
+                forgotPasswordLink: "نسيت كلمة المرور؟",
+                resetPasswordTitle: "إعادة تعيين كلمة المرور",
+                resetPasswordDesc: "أدخل عنوان بريدك الإلكتروني وسنرسل لك رمز التحقق",
+                sendCode: "إرسال الرمز",
+                backToLogin: "العودة لتسجيل الدخول",
+                verificationSent: "تم إرسال رمز التحقق!",
+                checkEmail: "يرجى التحقق من بريدك الإلكتروني للحصول على رمز التحقق.",
+                simulatedEmail: "* هذا محاكاة - استخدم الرمز أعلاه",
+                verificationCode: "رمز التحقق",
+                verifyCode: "التحقق من الرمز",
+                backToEmail: "رجوع",
+                createNewPassword: "إنشاء كلمة مرور جديدة",
+                newPasswordDesc: "أدخل كلمة المرور الجديدة أدناه",
+                newPassword: "كلمة المرور الجديدة",
+                confirmNewPassword: "تأكيد كلمة المرور الجديدة",
+                resetPassword: "إعادة تعيين كلمة المرور",
+                dashboard: "لوحة التحكم",
+                orders: "الطلبات",
+                products: "المنتجات",
+                customers: "العملاء",
+                language: "اللغة",
+                currency: "العملة",
+                newOrder: "طلب جديد",
+                addOrder: "إضافة طلب",
+                editOrder: "تعديل الطلب",
+                addProduct: "إضافة منتج",
+                editProduct: "تعديل المنتج",
+                addCustomer: "إضافة عميل",
+                editCustomer: "تعديل العميل",
+                allOrders: "جميع الطلبات",
+                allProducts: "جميع المنتجات",
+                allCustomers: "جميع العملاء",
+                totalOrders: "إجمالي الطلبات",
+                totalRevenue: "إجمالي الإيرادات",
+                totalProducts: "إجمالي المنتجات",
+                totalCustomers: "إجمالي العملاء",
+                recentOrders: "الطلبات الأخيرة",
+                orderNumber: "رقم الطلب",
+                generateNew: "إنشاء رقم جديد",
+                customer: "العميل",
+                product: "المنتج",
+                total: "الإجمالي",
+                actions: "الإجراءات",
+                productName: "اسم المنتج",
+                category: "الفئة",
+                price: "السعر",
+                stock: "المخزون",
+                description: "الوصف",
+                customerName: "اسم العميل",
+                phone: "الهاتف",
+                city: "المدينة",
+                address: "العنوان",
+                save: "حفظ",
+                update: "تحديث",
+                cancel: "إلغاء",
+                edit: "تعديل",
+                delete: "حذف",
+                view: "عرض",
+                createOrder: "إنشاء الطلب",
+                updateOrder: "تحديث الطلب",
+                orderDate: "تاريخ الطلب",
+                orderNotes: "ملاحظات الطلب",
+                paymentStatus: "حالة الدفع",
+                paid: "مدفوع",
+                paymentPending: "دفع معلق",
+                partialPayment: "دفع جزئي",
+                unpaid: "غير مدفوع",
+                paidAmount: "المبلغ المدفوع",
+                remainingAmount: "المبلغ المتبقي",
+                orderStatus: "حالة الطلب",
+                completed: "تم",
+                inProgress: "قيد الانتظار",
+                cancelled: "ملغى",
+                shippingMethod: "طريقة الإرسال",
+                standardShipping: "إرسال عادي",
+                expressShipping: "إرسال سريع",
+                overnightShipping: "إرسال ليلي",
+                pickupShipping: "استلام من المتجر",
+                exportAll: "تصدير جميع البيانات",
+                exportOrders: "تصدير الطلبات",
+                exportProducts: "تصدير المنتجات",
+                exportCustomers: "تصدير العملاء",
+                shareWhatsApp: "مشاركة على واتساب",
+                shareOnWhatsApp: "مشاركة",
+                phoneNumber: "رقم الهاتف",
+                customMessage: "رسالة مخصصة",
+                messagePreview: "معاينة الرسالة",
+                sendWhatsApp: "إرسال واتساب"
+            },
+            pl: {
+                appName: "Menedżer Sklepu",
+                loginSubtitle: "Dostęp do danych z dowolnego miejsca",
+                loading: "Ładowanie...",
+                cloudConnected: "Połączony z chmurą",
+                syncing: "Synchronizacja...",
+                offline: "Tryb offline",
+                synced: "Zsynchronizowane z chmurą",
+                accessAnywhere: "Dostęp z dowolnego urządzenia",
+                login: "Zaloguj się",
+                register: "Zarejestruj się",
+                forgotPassword: "Zapomniałeś hasła",
+                emailOrUsername: "E-mail lub nazwa użytkownika",
+                username: "Nazwa użytkownika",
+                password: "Hasło",
+                fullName: "Pełne imię",
+                email: "Adres e-mail",
+                confirmPassword: "Potwierdź hasło",
+                companyName: "Nazwa firmy/sklepu",
+                loginBtn: "Zaloguj",
+                registerBtn: "Utwórz konto",
+                logout: "Wyloguj",
+                forgotPasswordLink: "Zapomniałeś hasła?",
+                resetPasswordTitle: "Zresetuj hasło",
+                resetPasswordDesc: "Wprowadź swój adres e-mail, a wyślemy Ci kod weryfikacyjny",
+                sendCode: "Wyślij kod",
+                backToLogin: "Powrót do logowania",
+                verificationSent: "Kod weryfikacyjny wysłany!",
+                checkEmail: "Sprawdź swoją skrzynkę e-mail w poszukiwaniu kodu weryfikacyjnego.",
+                simulatedEmail: "* To jest symulacja - użyj kodu powyżej",
+                verificationCode: "Kod weryfikacyjny",
+                verifyCode: "Zweryfikuj kod",
+                backToEmail: "Wstecz",
+                createNewPassword: "Utwórz nowe hasło",
+                newPasswordDesc: "Wprowadź nowe hasło poniżej",
+                newPassword: "Nowe hasło",
+                confirmNewPassword: "Potwierdź nowe hasło",
+                resetPassword: "Zresetuj hasło",
+                dashboard: "Panel główny",
+                orders: "Zamówienia",
+                products: "Produkty",
+                customers: "Klienci",
+                language: "Język",
+                currency: "Waluta",
+                newOrder: "Nowe zamówienie",
+                addOrder: "Dodaj zamówienie",
+                editOrder: "Edytuj zamówienie",
+                addProduct: "Dodaj produkt",
+                editProduct: "Edytuj produkt",
+                addCustomer: "Dodaj klienta",
+                editCustomer: "Edytuj klienta",
+                allOrders: "Wszystkie zamówienia",
+                allProducts: "Wszystkie produkty",
+                allCustomers: "Wszyscy klienci",
+                totalOrders: "Całkowita liczba zamówień",
+                totalRevenue: "Całkowity przychód",
+                totalProducts: "Całkowita liczba produktów",
+                totalCustomers: "Całkowita liczba klientów",
+                recentOrders: "Ostatnie zamówienia",
+                orderNumber: "Numer zamówienia",
+                generateNew: "Generuj nowy",
+                customer: "Klient",
+                product: "Produkt",
+                total: "Suma",
+                actions: "Akcje",
+                productName: "Nazwa produktu",
+                category: "Kategoria",
+                price: "Cena",
+                stock: "Stan",
+                description: "Opis",
+                customerName: "Nazwa klienta",
+                phone: "Telefon",
+                city: "Miasto",
+                address: "Adres",
+                save: "Zapisz",
+                update: "Aktualizuj",
+                cancel: "Anuluj",
+                edit: "Edytuj",
+                delete: "Usuń",
+                view: "Zobacz",
+                createOrder: "Utwórz zamówienie",
+                updateOrder: "Aktualizuj zamówienie",
+                orderDate: "Data zamówienia",
+                orderNotes: "Notatki zamówienia",
+                paymentStatus: "Status płatności",
+                paid: "Opłacone",
+                paymentPending: "Płatność oczekująca",
+                partialPayment: "Płatność częściowa",
+                unpaid: "Nieopłacone",
+                paidAmount: "Kwota wpłacona",
+                remainingAmount: "Pozostała kwota",
+                orderStatus: "Status zamówienia",
+                completed: "Ukończone",
+                inProgress: "W trakcie",
+                cancelled: "Anulowane",
+                shippingMethod: "Metoda wysyłki",
+                standardShipping: "Standardowa wysyłka",
+                expressShipping: "Ekspresowa wysyłka",
+                overnightShipping: "Wysyłka nocna",
+                pickupShipping: "Odbiór w sklepie",
+                exportAll: "Eksportuj wszystkie dane",
+                exportOrders: "Eksportuj zamówienia",
+                exportProducts: "Eksportuj produkty",
+                exportCustomers: "Eksportuj klientów",
+                shareWhatsApp: "Udostępnij na WhatsApp",
+                shareOnWhatsApp: "Udostępnij",
+                phoneNumber: "Numer telefonu",
+                customMessage: "Wiadomość niestandardowa",
+                messagePreview: "Podgląd wiadomości",
+                sendWhatsApp: "Wyślij WhatsApp"
+            }
+        };
+
+        // Current user session data
+        let currentLanguage = 'en';
+        let currentCurrency = 'USD';
+        let currentUser = null;
+        let whatsappDataType = 'dashboard';
+        let currentVerificationCode = null;
+        let resetEmail = null;
+        let editingItemId = null;
+        let editingItemType = null;
+
+        // User-specific data (will be loaded based on current user from cloud)
+        let products = [];
+        let customers = [];
+        let orders = [];
+
+        // Currency formatting function
+        function formatCurrency(amount, currency = currentCurrency) {
+            const symbol = currencySymbols[currency];
+            if (currency === 'PLN') {
+                return `${amount.toFixed(2)} ${symbol}`;
+            } else {
+                return `${symbol}${amount.toFixed(2)}`;
+            }
+        }
+
+        // Convert currency
+        function convertCurrency(amount, fromCurrency, toCurrency) {
+            if (fromCurrency === toCurrency) return amount;
+            
+            // Convert to USD first, then to target currency
+            let usdAmount = amount;
+            if (fromCurrency !== 'USD') {
+                usdAmount = amount * exchangeRates[fromCurrency]['USD'];
+            }
+            
+            if (toCurrency === 'USD') {
+                return usdAmount;
+            }
+            
+            return usdAmount * exchangeRates['USD'][toCurrency];
+        }
+
+        // Update form currency when currency dropdown changes
+        function updateFormCurrency() {
+            const selectedCurrency = document.querySelector('select[name="currency"]').value;
+            currentCurrency = selectedCurrency;
+            document.getElementById('currencySelect').value = selectedCurrency;
+            saveCloudSetting('currency', currentCurrency);
+        }
+
+        // Cloud Database Functions
+        async function saveToCloud(collection, docId, data) {
+            try {
+                setCloudStatus('syncing');
+                await db.collection(`users/${currentUser.uid}/${collection}`).doc(docId).set(data);
+                setCloudStatus('connected');
+                return true;
+            } catch (error) {
+                console.error('Cloud save error:', error);
+                setCloudStatus('disconnected');
+                // Fallback to localStorage
+                localStorage.setItem(`${currentUser.uid}_${collection}_${docId}`, JSON.stringify(data));
+                return false;
+            }
+        }
+
+        async function loadFromCloud(collection) {
+            try {
+                const snapshot = await db.collection(`users/${currentUser.uid}/${collection}`).get();
+                const data = [];
+                snapshot.docs.forEach(doc => {
+                    data.push({ id: doc.id, ...doc.data() });
+                });
+                setCloudStatus('connected');
+                return data;
+            } catch (error) {
+                console.error('Cloud load error:', error);
+                setCloudStatus('disconnected');
+                // Fallback to localStorage
+                const fallbackData = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith(`${currentUser.uid}_${collection}_`)) {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        fallbackData.push(data);
+                    }
+                }
+                return fallbackData;
+            }
+        }
+
+        async function updateCloudDoc(collection, docId, data) {
+            try {
+                setCloudStatus('syncing');
+                await db.collection(`users/${currentUser.uid}/${collection}`).doc(docId).update(data);
+                setCloudStatus('connected');
+                return true;
+            } catch (error) {
+                console.error('Cloud update error:', error);
+                setCloudStatus('disconnected');
+                // Fallback to localStorage
+                const existing = localStorage.getItem(`${currentUser.uid}_${collection}_${docId}`);
+                const updated = { ...JSON.parse(existing || '{}'), ...data };
+                localStorage.setItem(`${currentUser.uid}_${collection}_${docId}`, JSON.stringify(updated));
+                return false;
+            }
+        }
+
+        async function deleteFromCloud(collection, docId) {
+            try {
+                setCloudStatus('syncing');
+                await db.collection(`users/${currentUser.uid}/${collection}`).doc(docId).delete();
+                setCloudStatus('connected');
+                return true;
+            } catch (error) {
+                console.error('Cloud delete error:', error);
+                setCloudStatus('disconnected');
+                // Fallback to localStorage
+                localStorage.removeItem(`${currentUser.uid}_${collection}_${docId}`);
+                return false;
+            }
+        }
+
+        async function saveCloudSetting(key, value) {
+            try {
+                await db.collection('userSettings').doc(currentUser.uid).update({
+                    [key]: value,
+                    updatedAt: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error('Settings save error:', error);
+                localStorage.setItem(`settings_${currentUser.uid}_${key}`, value);
+            }
+        }
+
+        async function loadUserData() {
+            if (!currentUser) return;
+
+            showLoading('Loading your data...');
+
+            try {
+                // Load user-specific data from cloud
+                products = await loadFromCloud('products');
+                customers = await loadFromCloud('customers');
+                orders = await loadFromCloud('orders');
+
+                // Load user settings
+                const settingsDoc = await db.collection('userSettings').doc(currentUser.uid).get();
+                if (settingsDoc.exists) {
+                    const settings = settingsDoc.data();
+                    currentLanguage = settings.language || 'en';
+                    currentCurrency = settings.currency || 'USD';
+                    
+                    // Update UI selectors
+                    document.getElementById('languageSelect').value = currentLanguage;
+                    document.getElementById('loginLanguageSelect').value = currentLanguage;
+                    document.getElementById('currencySelect').value = currentCurrency;
+                }
+
+                // Initialize with sample data for new users if empty
+                if (products.length === 0) {
+                    products = [
+                        { id: 'prod_1', name: "Sample Product 1", category: "Electronics", price: 99.99, currency: 'USD', stock: 10, description: "Sample product description" },
+                        { id: 'prod_2', name: "Sample Product 2", category: "Clothing", price: 49.99, currency: 'USD', stock: 25, description: "Another sample product" }
+                    ];
+                    // Save sample data to cloud
+                    for (const product of products) {
+                        await saveToCloud('products', product.id, product);
+                    }
+                }
+
+                if (customers.length === 0) {
+                    customers = [
+                        { id: 'cust_1', name: "Sample Customer", email: "customer@example.com", phone: "+1234567890", city: "Sample City", address: "123 Sample Street" }
+                    ];
+                    // Save sample data to cloud
+                    for (const customer of customers) {
+                        await saveToCloud('customers', customer.id, customer);
+                    }
+                }
+
+                console.log(`Loaded data for user ${currentUser.fullName}:`, {
+                    products: products.length,
+                    customers: customers.length,
+                    orders: orders.length
+                });
+
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showAuthMessage('Error loading data from cloud', 'error');
+            }
+
+            hideLoading();
+        }
+
+        async function saveUserData() {
+            if (!currentUser) return;
+
+            try {
+                setCloudStatus('syncing');
+                
+                // Save each data type to cloud
+                for (const product of products) {
+                    await saveToCloud('products', product.id, product);
+                }
+                
+                for (const customer of customers) {
+                    await saveToCloud('customers', customer.id, customer);
+                }
+                
+                for (const order of orders) {
+                    await saveToCloud('orders', order.id, order);
+                }
+
+                // Save user settings
+                await saveCloudSetting('language', currentLanguage);
+                await saveCloudSetting('currency', currentCurrency);
+                
+                setCloudStatus('connected');
+                console.log(`Saved data for user ${currentUser.fullName} to cloud`);
+            } catch (error) {
+                console.error('Error saving to cloud:', error);
+                setCloudStatus('disconnected');
+            }
+        }
+
+        // Authentication functions for cloud
+        async function login(emailOrUsername, password) {
+            console.log('Login attempt:', emailOrUsername, password);
+            
+            showLoading('Authenticating...');
+            
+            try {
+                // In a real app, you would use Firebase Auth
+                // For demo, we'll simulate cloud authentication
+                await simulateNetworkDelay();
+                
+                // Get user from cloud (simulated)
+                const usersSnapshot = await db.collection('users').get();
+                let user = null;
+                
+                usersSnapshot.docs.forEach(doc => {
+                    const userData = doc.data();
+                    if ((userData.email === emailOrUsername || userData.username === emailOrUsername) && 
+                        userData.password === password && 
+                        userData.emailVerified) {
+                        user = { uid: doc.id, ...userData };
+                    }
+                });
+                
+                if (user) {
+                    currentUser = user;
+                    user.lastLogin = new Date().toISOString();
+                    
+                    // Update user's last login in cloud
+                    await db.collection('users').doc(user.uid).update({
+                        lastLogin: user.lastLogin
+                    });
+                    
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    // Load user-specific data
+                    await loadUserData();
+                    
+                    hideLoading();
+                    showApp();
+                    updateUserInfo();
+                    updateDashboardStats();
+                    showAuthMessage('Login successful!', 'success');
+                    return true;
+                } else {
+                    hideLoading();
+                    showAuthMessage('Invalid email/username or password', 'error');
+                    return false;
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Login error:', error);
+                showAuthMessage('Login failed. Please try again.', 'error');
+                return false;
+            }
+        }
+
+        async function register(userData) {
+            showLoading('Creating account...');
+            
+            try {
+                // Check if email already exists
+                const usersSnapshot = await db.collection('users').get();
+                let emailExists = false;
+                let usernameExists = false;
+                
+                usersSnapshot.docs.forEach(doc => {
+                    const user = doc.data();
+                    if (user.email === userData.email) emailExists = true;
+                    if (user.username === userData.username) usernameExists = true;
+                });
+
+                if (emailExists) {
+                    hideLoading();
+                    return { success: false, message: 'Email address already registered' };
+                }
+
+                if (usernameExists) {
+                    hideLoading();
+                    return { success: false, message: 'Username already exists' };
+                }
+
+                // Validate email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(userData.email)) {
+                    hideLoading();
+                    return { success: false, message: 'Invalid email address format' };
+                }
+
+                const newUser = {
+                    username: userData.username,
+                    password: userData.password,
+                    fullName: userData.fullName,
+                    email: userData.email,
+                    companyName: userData.companyName,
+                    emailVerified: true, // Auto-verified for demo
+                    createdAt: new Date().toISOString(),
+                    lastLogin: null
+                };
+
+                // Save user to cloud
+                const userDoc = await db.collection('users').add(newUser);
+                
+                // Initialize user settings
+                await db.collection('userSettings').doc(userDoc.id).set({
+                    language: 'en',
+                    currency: 'USD',
+                    createdAt: new Date().toISOString()
+                });
+                
+                hideLoading();
+                
+                return { success: true, message: 'Account created successfully! You can now login with your credentials.' };
+            } catch (error) {
+                hideLoading();
+                console.error('Registration error:', error);
+                return { success: false, message: 'Registration failed. Please try again.' };
+            }
+        }
+
+        function sendVerificationCode() {
+            const email = document.querySelector('input[name="resetEmail"]').value;
+            
+            if (!email) {
+                showAuthMessage('Please enter your email address', 'error');
+                return;
+            }
+
+            showLoading('Sending verification code...');
+
+            // Simulate sending verification code
+            setTimeout(() => {
+                const code = Math.floor(100000 + Math.random() * 900000).toString();
+                currentVerificationCode = code;
+                document.getElementById('displayedCode').textContent = code;
+                resetEmail = email;
+                showVerificationStep();
+                hideLoading();
+                showAuthMessage('Verification code sent to your email!', 'success');
+            }, 1000);
+        }
+
+        function verifyCode() {
+            const enteredCode = document.querySelector('input[name="verificationCode"]').value;
+            
+            if (!enteredCode) {
+                showAuthMessage('Please enter the verification code', 'error');
+                return;
+            }
+
+            if (enteredCode === currentVerificationCode) {
+                showResetStep();
+                showAuthMessage('Code verified successfully!', 'success');
+            } else {
+                showAuthMessage('Invalid verification code. Please try again.', 'error');
+            }
+        }
+
+        async function resetPassword() {
+            const newPassword = document.querySelector('input[name="newPassword"]').value;
+            const confirmPassword = document.querySelector('input[name="confirmNewPassword"]').value;
+            
+            if (!newPassword || !confirmPassword) {
+                showAuthMessage('Please fill in all password fields', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showAuthMessage('Passwords do not match', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showAuthMessage('Password must be at least 6 characters long', 'error');
+                return;
+            }
+
+            showLoading('Resetting password...');
+
+            try {
+                // Find and update user password in cloud
+                const usersSnapshot = await db.collection('users').get();
+                let userDoc = null;
+                
+                usersSnapshot.docs.forEach(doc => {
+                    if (doc.data().email === resetEmail) {
+                        userDoc = doc;
+                    }
+                });
+
+                if (userDoc) {
+                    await db.collection('users').doc(userDoc.id).update({
+                        password: newPassword,
+                        updatedAt: new Date().toISOString()
+                    });
+                    
+                    hideLoading();
+                    showAuthMessage('Password reset successfully! You can now login with your new password.', 'success');
+                    
+                    setTimeout(() => {
+                        resetPasswordForm();
+                        toggleAuthMode('login');
+                    }, 2000);
+                } else {
+                    hideLoading();
+                    showAuthMessage('User not found', 'error');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Password reset error:', error);
+                showAuthMessage('Password reset failed. Please try again.', 'error');
+            }
+        }
+
+        function logout() {
+            // Save current user data before logout
+            if (currentUser) {
+                saveUserData();
+            }
+            
+            currentUser = null;
+            products = [];
+            customers = [];
+            orders = [];
+            
+            localStorage.removeItem('currentUser');
+            showLogin();
+        }
+
+        function showLogin() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('appContainer').classList.add('hidden');
+        }
+
+        function showApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+            loadAll();
+        }
+
+        function updateUserInfo() {
+            if (currentUser) {
+                document.getElementById('userAvatar').textContent = currentUser.fullName.charAt(0).toUpperCase();
+                document.getElementById('userName').textContent = currentUser.fullName;
+                document.getElementById('userRole').textContent = 'Store Owner';
+                document.getElementById('companyName').textContent = currentUser.companyName || 'My Store';
+            }
+        }
+
+        // Password recovery step navigation
+        function showEmailStep() {
+            document.getElementById('emailStep').classList.remove('hidden');
+            document.getElementById('verificationStep').classList.add('hidden');
+            document.getElementById('resetStep').classList.add('hidden');
+        }
+
+        function showVerificationStep() {
+            document.getElementById('emailStep').classList.add('hidden');
+            document.getElementById('verificationStep').classList.remove('hidden');
+            document.getElementById('resetStep').classList.add('hidden');
+        }
+
+        function showResetStep() {
+            document.getElementById('emailStep').classList.add('hidden');
+            document.getElementById('verificationStep').classList.add('hidden');
+            document.getElementById('resetStep').classList.remove('hidden');
+        }
+
+        function backToEmailStep() {
+            showEmailStep();
+            hideAuthMessage();
+        }
+
+        function resetPasswordForm() {
+            document.getElementById('forgotPasswordForm').reset();
+            showEmailStep();
+            currentVerificationCode = null;
+            resetEmail = null;
+        }
+
+        // Order number generation functions
+        function generateOrderNumber() {
+            const today = new Date();
+            const year = today.getFullYear().toString().slice(-2);
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const day = today.getDate().toString().padStart(2, '0');
+            
+            // Find the highest order number for today for this user
+            const todayPrefix = `ORD-${year}${month}${day}`;
+            const todayOrders = orders.filter(order => 
+                order.orderNumber && order.orderNumber.startsWith(todayPrefix)
+            );
+            
+            let nextNumber = 1;
+            if (todayOrders.length > 0) {
+                const lastNumbers = todayOrders.map(order => {
+                    const parts = order.orderNumber.split('-');
+                    return parseInt(parts[parts.length - 1]) || 0;
+                });
+                nextNumber = Math.max(...lastNumbers) + 1;
+            }
+            
+            const orderNumber = `${todayPrefix}-${nextNumber.toString().padStart(3, '0')}`;
+            
+            // Update the display and input field
+            document.getElementById('currentOrderNumber').textContent = orderNumber;
+            document.querySelector('input[name="orderNumber"]').value = orderNumber;
+            
+            return orderNumber;
+        }
+
+        // Payment calculation functions
+        function calculatePayment() {
+            const priceInput = document.querySelector('input[name="price"]');
+            const paidInput = document.querySelector('input[name="paidAmount"]');
+            const remainingInput = document.querySelector('input[name="remainingAmount"]');
+            const paymentStatusSelect = document.querySelector('select[name="paymentStatus"]');
+            
+            const totalPrice = parseFloat(priceInput.value) || 0;
+            const paidAmount = parseFloat(paidInput.value) || 0;
+            const remaining = Math.max(0, totalPrice - paidAmount);
+            
+            if (remainingInput) {
+                remainingInput.value = remaining.toFixed(2);
+            }
+            
+            // Auto-update payment status based on amounts
+            if (paymentStatusSelect) {
+                if (paidAmount >= totalPrice && totalPrice > 0) {
+                    paymentStatusSelect.value = 'paid';
+                } else if (paidAmount > 0) {
+                    paymentStatusSelect.value = 'partial';
+                } else {
+                    paymentStatusSelect.value = 'unpaid';
+                }
+            }
+        }
+
+        function calculateRemaining() {
+            const priceInput = document.querySelector('input[name="price"]');
+            const paidInput = document.querySelector('input[name="paidAmount"]');
+            const remainingInput = document.querySelector('input[name="remainingAmount"]');
+            
+            const totalPrice = parseFloat(priceInput.value) || 0;
+            const paidAmount = parseFloat(paidInput.value) || 0;
+            const remaining = Math.max(0, totalPrice - paidAmount);
+            
+            if (remainingInput) {
+                remainingInput.value = remaining.toFixed(2);
+            }
+        }
+
+        function handlePaymentStatusChange() {
+            const paymentStatusSelect = document.querySelector('select[name="paymentStatus"]');
+            const priceInput = document.querySelector('input[name="price"]');
+            const paidInput = document.querySelector('input[name="paidAmount"]');
+            const remainingInput = document.querySelector('input[name="remainingAmount"]');
+            
+            if (!paymentStatusSelect || !priceInput || !paidInput || !remainingInput) return;
+            
+            const totalPrice = parseFloat(priceInput.value) || 0;
+            const status = paymentStatusSelect.value;
+            
+            switch (status) {
+                case 'paid':
+                    paidInput.value = totalPrice.toFixed(2);
+                    remainingInput.value = '0.00';
+                    break;
+                case 'unpaid':
+                    paidInput.value = '0.00';
+                    remainingInput.value = totalPrice.toFixed(2);
+                    break;
+                case 'pending':
+                    paidInput.value = '0.00';
+                    remainingInput.value = totalPrice.toFixed(2);
+                    break;
+                case 'partial':
+                    // User can manually enter amounts
+                    break;
+            }
+        }
+
+        // Data Export Functions
+        function exportToCSV(data, filename) {
+            if (!data || data.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const headers = Object.keys(data[0]);
+            const csvContent = [
+                headers.join(','),
+                ...data.map(row => 
+                    headers.map(header => 
+                        typeof row[header] === 'string' && row[header].includes(',') 
+                            ? `"${row[header]}"` 
+                            : row[header]
+                    ).join(',')
+                )
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportToJSON(data, filename) {
+            const jsonString = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportAllData() {
+            const allData = {
+                userInfo: {
+                    fullName: currentUser.fullName,
+                    email: currentUser.email,
+                    companyName: currentUser.companyName
+                },
+                products: products,
+                customers: customers,
+                orders: orders,
+                exportDate: new Date().toISOString(),
+                exportedBy: currentUser.fullName,
+                systemInfo: {
+                    language: currentLanguage,
+                    currency: currentCurrency,
+                    totalOrders: orders.length,
+                    totalProducts: products.length,
+                    totalCustomers: customers.length,
+                    dataSource: 'cloud_database'
+                }
+            };
+            
+            exportToJSON(allData, `${currentUser.companyName.replace(/\s+/g, '_')}_backup_${new Date().toISOString().split('T')[0]}.json`);
+            showAuthMessage('All data exported successfully!', 'success');
+        }
+
+        function exportOrders() {
+            if (orders.length === 0) {
+                alert('No orders to export');
+                return;
+            }
+            exportToCSV(orders, `${currentUser.companyName.replace(/\s+/g, '_')}_orders_${new Date().toISOString().split('T')[0]}.csv`);
+            showAuthMessage('Orders exported successfully!', 'success');
+        }
+
+        function exportProducts() {
+            if (products.length === 0) {
+                alert('No products to export');
+                return;
+            }
+            exportToCSV(products, `${currentUser.companyName.replace(/\s+/g, '_')}_products_${new Date().toISOString().split('T')[0]}.csv`);
+            showAuthMessage('Products exported successfully!', 'success');
+        }
+
+        function exportCustomers() {
+            if (customers.length === 0) {
+                alert('No customers to export');
+                return;
+            }
+            exportToCSV(customers, `${currentUser.companyName.replace(/\s+/g, '_')}_customers_${new Date().toISOString().split('T')[0]}.csv`);
+            showAuthMessage('Customers exported successfully!', 'success');
+        }
+
+        // WhatsApp Integration
+        function generateWhatsAppMessage(dataType, customMessage = '') {
+            const lang = translations[currentLanguage];
+            let message = '';
+
+            if (customMessage) {
+                message += customMessage + '\n\n';
+            }
+
+            message += `🏪 ${currentUser.companyName || lang.appName}\n`;
+            message += `${'-'.repeat(30)}\n\n`;
+
+            switch (dataType) {
+                case 'dashboard':
+                    message += `📊 ${lang.dashboard}\n`;
+                    message += `• ${lang.totalOrders}: ${orders.length}\n`;
+                    message += `• ${lang.totalProducts}: ${products.length}\n`;
+                    message += `• ${lang.totalCustomers}: ${customers.length}\n`;
+                    const totalRevenue = orders.reduce((sum, order) => {
+                        const convertedAmount = convertCurrency(order.total || 0, order.currency || 'USD', currentCurrency);
+                        return sum + convertedAmount;
+                    }, 0);
+                    message += `• ${lang.totalRevenue}: ${formatCurrency(totalRevenue)}\n`;
+                    break;
+
+                case 'orders':
+                    message += `🛒 ${lang.orders} (${orders.length})\n`;
+                    if (orders.length > 0) {
+                        orders.slice(-5).forEach(order => {
+                            const convertedTotal = convertCurrency(order.total || 0, order.currency || 'USD', currentCurrency);
+                            message += `• ${order.orderNumber} - ${order.customerName}\n`;
+                            message += `  ${order.productName} - ${formatCurrency(convertedTotal)}\n`;
+                            message += `  ${lang.paymentStatus}: ${lang[order.paymentStatus]}\n`;
+                            message += `  ${lang.orderStatus}: ${lang[order.orderStatus]}\n`;
+                            message += `  ${lang.shippingMethod}: ${lang[order.shippingMethod + 'Shipping']}\n\n`;
+                        });
+                    } else {
+                        message += `• No orders yet\n`;
+                    }
+                    break;
+
+                case 'products':
+                    message += `📦 ${lang.products} (${products.length})\n`;
+                    if (products.length > 0) {
+                        products.slice(0, 5).forEach(product => {
+                            const convertedPrice = convertCurrency(product.price || 0, product.currency || 'USD', currentCurrency);
+                            message += `• ${product.name}\n`;
+                            message += `  ${product.category} - ${formatCurrency(convertedPrice)}\n`;
+                            message += `  Stock: ${product.stock} units\n\n`;
+                        });
+                    } else {
+                        message += `• No products yet\n`;
+                    }
+                    break;
+
+                case 'customers':
+                    message += `👥 ${lang.customers} (${customers.length})\n`;
+                    if (customers.length > 0) {
+                        customers.slice(0, 5).forEach(customer => {
+                            message += `• ${customer.name}\n`;
+                            message += `  📧 ${customer.email}\n`;
+                            message += `  📞 ${customer.phone}\n`;
+                            message += `  📍 ${customer.city || 'N/A'}\n\n`;
+                        });
+                    } else {
+                        message += `• No customers yet\n`;
+                    }
+                    break;
+            }
+
+            message += `${'-'.repeat(30)}\n`;
+            message += `📅 ${new Date().toLocaleDateString()}\n`;
+            message += `👤 ${currentUser.fullName}\n`;
+            message += `🏢 ${currentUser.companyName}\n`;
+            message += `☁️ Powered by Cloud Database`;
+
+            return message;
+        }
+
+        function openWhatsAppModal(dataType) {
+            whatsappDataType = dataType;
+            updateWhatsAppPreview();
+            openModal('whatsappModal');
+        }
+
+        function updateWhatsAppPreview() {
+            const customMessage = document.querySelector('textarea[name="customMessage"]').value || '';
+            const message = generateWhatsAppMessage(whatsappDataType, customMessage);
+            document.getElementById('messagePreview').textContent = message;
+        }
+
+        function sendToWhatsApp(message, phone = null) {
+            if (phone) {
+                const cleanPhone = phone.replace(/[^\d+]/g, '');
+                const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+                return;
+            }
+
+            const form = document.getElementById('whatsappForm');
+            const formData = new FormData(form);
+            const countryCode = formData.get('countryCode');
+            const phoneNumber = formData.get('phoneNumber');
+            const customMessage = formData.get('customMessage');
+
+            if (!phoneNumber) {
+                alert('Please enter a phone number');
+                return;
+            }
+
+            const fullPhone = countryCode + phoneNumber.replace(/[^\d]/g, '');
+            const finalMessage = generateWhatsAppMessage(whatsappDataType, customMessage);
+            
+            const whatsappUrl = `https://wa.me/${fullPhone}?text=${encodeURIComponent(finalMessage)}`;
+            window.open(whatsappUrl, '_blank');
+            
+            closeModal('whatsappModal');
+            showAuthMessage('WhatsApp message sent successfully!', 'success');
+        }
+
+        // Dashboard stats
+        function updateDashboardStats() {
+            document.getElementById('totalOrdersCount').textContent = orders.length;
+            document.getElementById('totalProductsCount').textContent = products.length;
+            document.getElementById('totalCustomersCount').textContent = customers.length;
+            
+            const totalRevenue = orders.reduce((sum, order) => {
+                const convertedAmount = convertCurrency(order.total || 0, order.currency || 'USD', currentCurrency);
+                return sum + convertedAmount;
+            }, 0);
+            document.getElementById('totalRevenueAmount').textContent = formatCurrency(totalRevenue);
+        }
+
+        // Load functions
+        function loadAll() {
+            loadOrders();
+            loadProducts();
+            loadCustomers();
+            updateDashboardStats();
+        }
+
+        function loadOrders() {
+            const tbody = document.getElementById('ordersTable');
+            const dashboardTbody = document.getElementById('dashboardOrdersTable');
+            
+            if (orders.length === 0) {
+                const noDataRow = '<tr><td colspan="8" style="text-align: center; color: var(--text-secondary);">No orders yet</td></tr>';
+                if (tbody) tbody.innerHTML = noDataRow;
+                if (dashboardTbody) dashboardTbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-secondary);">No orders yet</td></tr>';
+                return;
+            }
+
+            const orderRows = orders.map(order => {
+                const convertedTotal = convertCurrency(order.total || 0, order.currency || 'USD', currentCurrency);
+                const convertedPaid = convertCurrency(order.paidAmount || 0, order.currency || 'USD', currentCurrency);
+                const convertedRemaining = convertCurrency(order.remainingAmount || 0, order.currency || 'USD', currentCurrency);
+                
+                return `
+                    <tr>
+                        <td><strong>${order.orderNumber}</strong></td>
+                        <td>${order.customerName}</td>
+                        <td>${order.productName}</td>
+                        <td>${formatCurrency(convertedTotal)}</td>
+                        <td><span class="badge badge-${order.paymentStatus}">${translations[currentLanguage][order.paymentStatus] || order.paymentStatus}</span></td>
+                        <td><span class="badge badge-${order.orderStatus}">${translations[currentLanguage][order.orderStatus] || order.orderStatus}</span></td>
+                        <td><span class="badge badge-${order.shippingMethod}">${translations[currentLanguage][order.shippingMethod + 'Shipping'] || order.shippingMethod}</span></td>
+                        <td>
+                            <button class="action-btn view" onclick="viewOrder('${order.id}')">View</button>
+                            <button class="action-btn whatsapp" onclick="shareOrderOnWhatsApp('${order.id}')" title="Share on WhatsApp">📱</button>
+                            <button class="action-btn edit" onclick="editOrder('${order.id}')">Edit</button>
+                            <button class="action-btn delete" onclick="deleteOrder('${order.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            const dashboardRows = orders.slice(-5).map(order => {
+                const convertedTotal = convertCurrency(order.total || 0, order.currency || 'USD', currentCurrency);
+                
+                return `
+                    <tr>
+                        <td><strong>${order.orderNumber}</strong></td>
+                        <td>${order.customerName}</td>
+                        <td>${formatCurrency(convertedTotal)}</td>
+                        <td><span class="badge badge-${order.paymentStatus}">${translations[currentLanguage][order.paymentStatus] || order.paymentStatus}</span></td>
+                        <td><span class="badge badge-${order.orderStatus}">${translations[currentLanguage][order.orderStatus] || order.orderStatus}</span></td>
+                        <td><span class="badge badge-${order.shippingMethod}">${translations[currentLanguage][order.shippingMethod + 'Shipping'] || order.shippingMethod}</span></td>
+                        <td>
+                            <button class="action-btn view" onclick="viewOrder('${order.id}')">View</button>
+                            <button class="action-btn whatsapp" onclick="shareOrderOnWhatsApp('${order.id}')">📱</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (tbody) tbody.innerHTML = orderRows;
+            if (dashboardTbody) dashboardTbody.innerHTML = dashboardRows;
+        }
+
+        function loadProducts() {
+            const tbody = document.getElementById('productsTable');
+            if (!tbody) return;
+
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No products yet</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = products.map(product => {
+                const convertedPrice = convertCurrency(product.price || 0, product.currency || 'USD', currentCurrency);
+                
+                return `
+                    <tr>
+                        <td>${product.name}</td>
+                        <td>${product.category}</td>
+                        <td>${formatCurrency(convertedPrice)}</td>
+                        <td>${product.stock}</td>
+                        <td>
+                            <button class="action-btn whatsapp" onclick="shareProductOnWhatsApp('${product.id}')" title="Share on WhatsApp">📱</button>
+                            <button class="action-btn edit" onclick="editProduct('${product.id}')">Edit</button>
+                            <button class="action-btn delete" onclick="deleteProduct('${product.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadCustomers() {
+            const tbody = document.getElementById('customersTable');
+            if (!tbody) return;
+
+            if (customers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No customers yet</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = customers.map(customer => `
+                <tr>
+                    <td>${customer.name}</td>
+                    <td>${customer.email}</td>
+                    <td>${customer.phone}</td>
+                    <td>${customer.city || 'N/A'}</td>
+                    <td>
+                        <button class="action-btn whatsapp" onclick="contactCustomerWhatsApp('${customer.id}')" title="Contact via WhatsApp">📱</button>
+                        <button class="action-btn edit" onclick="editCustomer('${customer.id}')">Edit</button>
+                        <button class="action-btn delete" onclick="deleteCustomer('${customer.id}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // WhatsApp sharing functions
+        function shareOrderOnWhatsApp(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const lang = translations[currentLanguage];
+            const convertedTotal = convertCurrency(order.total || 0, order.currency || 'USD', currentCurrency);
+            const convertedPaid = convertCurrency(order.paidAmount || 0, order.currency || 'USD', currentCurrency);
+            const convertedRemaining = convertCurrency(order.remainingAmount || 0, order.currency || 'USD', currentCurrency);
+            
+            const message = `🛒 ${order.orderNumber}\n\n` +
+                          `🏢 ${currentUser.companyName}\n` +
+                          `👤 ${lang.customer}: ${order.customerName}\n` +
+                          `📦 ${lang.product}: ${order.productName}\n` +
+                          `💰 ${lang.total}: ${formatCurrency(convertedTotal)}\n` +
+                          `💳 ${lang.paymentStatus}: ${lang[order.paymentStatus]}\n` +
+                          `📋 ${lang.orderStatus}: ${lang[order.orderStatus]}\n` +
+                          `🚚 ${lang.shippingMethod}: ${lang[order.shippingMethod + 'Shipping']}\n` +
+                          `💵 ${lang.paidAmount}: ${formatCurrency(convertedPaid)}\n` +
+                          `💸 ${lang.remainingAmount}: ${formatCurrency(convertedRemaining)}\n\n` +
+                          `📅 ${order.date}\n` +
+                          `👤 ${currentUser.fullName}\n` +
+                          `☁️ Cloud Database`;
+            
+            const phone = prompt('Enter WhatsApp number (with country code):');
+            if (phone) {
+                sendToWhatsApp(message, phone);
+            }
+        }
+
+        function shareProductOnWhatsApp(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const lang = translations[currentLanguage];
+            const convertedPrice = convertCurrency(product.price || 0, product.currency || 'USD', currentCurrency);
+            
+            const message = `📦 ${lang.productName}\n\n` +
+                          `🏢 ${currentUser.companyName}\n` +
+                          `${product.name}\n` +
+                          `🏷️ ${lang.category}: ${product.category}\n` +
+                          `💰 ${lang.price}: ${formatCurrency(convertedPrice)}\n` +
+                          `📦 ${lang.stock}: ${product.stock} units\n\n` +
+                          `${product.description ? product.description + '\n\n' : ''}` +
+                          `Available now! Contact us for orders.\n\n` +
+                          `👤 ${currentUser.fullName}`;
+            
+            const phone = prompt('Enter WhatsApp number (with country code):');
+            if (phone) {
+                sendToWhatsApp(message, phone);
+            }
+        }
+
+        function contactCustomerWhatsApp(customerId) {
+            const customer = customers.find(c => c.id === customerId);
+            if (!customer) return;
+
+            const lang = translations[currentLanguage];
+            const message = `Hello ${customer.name}! 👋\n\n` +
+                          `Thank you for being our valued customer at ${currentUser.companyName}.\n\n` +
+                          `We have some exciting updates about our products and services.\n\n` +
+                          `Feel free to contact us anytime!\n\n` +
+                          `Best regards,\n${currentUser.fullName}\n${currentUser.companyName}`;
+            
+            let phone = customer.phone.replace(/[^\d+]/g, '');
+            if (!phone.startsWith('+')) {
+                phone = '+1' + phone;
+            }
+            
+            sendToWhatsApp(message, phone);
+        }
+
+        // Initialize app
+        async function initApp() {
+            console.log('Initializing app with cloud database...');
+            
+            showLoading('Connecting to cloud...');
+            
+            // Load saved user session
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                
+                // Load user data from cloud
+                await loadUserData();
+                showApp();
+                updateUserInfo();
+            } else {
+                hideLoading();
+                showLogin();
+            }
+
+            // Load saved language and currency
+            const savedLanguage = localStorage.getItem('globalLanguage');
+            if (savedLanguage) {
+                currentLanguage = savedLanguage;
+                document.getElementById('languageSelect').value = savedLanguage;
+                document.getElementById('loginLanguageSelect').value = savedLanguage;
+            }
+
+            const savedCurrency = localStorage.getItem('globalCurrency');
+            if (savedCurrency) {
+                currentCurrency = savedCurrency;
+                document.getElementById('currencySelect').value = savedCurrency;
+            }
+
+            updateLanguage();
+            setupEventListeners();
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // Login form
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const emailOrUsername = formData.get('emailOrUsername');
+                const password = formData.get('password');
+                await login(emailOrUsername, password);
+            });
+
+            // Register form
+            document.getElementById('registerForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                
+                if (formData.get('password') !== formData.get('confirmPassword')) {
+                    showAuthMessage('Passwords do not match', 'error');
+                    return;
+                }
+
+                if (formData.get('password').length < 6) {
+                    showAuthMessage('Password must be at least 6 characters long', 'error');
+                    return;
+                }
+
+                const userData = {
+                    username: formData.get('username'),
+                    password: formData.get('password'),
+                    fullName: formData.get('fullName'),
+                    email: formData.get('email'),
+                    companyName: formData.get('companyName')
+                };
+
+                const result = await register(userData);
+                if (result.success) {
+                    showAuthMessage(result.message, 'success');
+                    e.target.reset();
+                    setTimeout(() => {
+                        toggleAuthMode('login');
+                    }, 2000);
+                } else {
+                    showAuthMessage(result.message, 'error');
+                }
+            });
+
+            // Language selectors
+            document.getElementById('loginLanguageSelect').addEventListener('change', function(e) {
+                currentLanguage = e.target.value;
+                document.getElementById('languageSelect').value = currentLanguage;
+                updateLanguage();
+                localStorage.setItem('globalLanguage', currentLanguage);
+                if (currentUser) {
+                    saveCloudSetting('language', currentLanguage);
+                }
+            });
+
+            document.getElementById('languageSelect').addEventListener('change', function(e) {
+                currentLanguage = e.target.value;
+                document.getElementById('loginLanguageSelect').value = currentLanguage;
+                updateLanguage();
+                localStorage.setItem('globalLanguage', currentLanguage);
+                if (currentUser) {
+                    saveCloudSetting('language', currentLanguage);
+                }
+            });
+
+            // Currency selector
+            document.getElementById('currencySelect').addEventListener('change', function(e) {
+                currentCurrency = e.target.value;
+                localStorage.setItem('globalCurrency', currentCurrency);
+                if (currentUser) {
+                    saveCloudSetting('currency', currentCurrency);
+                    loadAll(); // Refresh all displays with new currency
+                }
+            });
+
+            // Form submissions
+            document.getElementById('orderForm').addEventListener('submit', handleOrderSubmit);
+            document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
+            document.getElementById('customerForm').addEventListener('submit', handleCustomerSubmit);
+            document.getElementById('whatsappForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                sendToWhatsApp();
+            });
+        }
+
+        // Authentication form toggle
+        function toggleAuthMode(mode) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const forgotForm = document.getElementById('forgotPasswordForm');
+            const toggleButtons = document.querySelectorAll('.auth-toggle-btn');
+
+            // Reset all forms
+            loginForm.classList.add('hidden');
+            registerForm.classList.add('hidden');
+            forgotForm.classList.add('hidden');
+
+            // Remove active class from all buttons
+            toggleButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
+            // Show selected form
+            if (mode === 'login') {
+                loginForm.classList.remove('hidden');
+                document.querySelector('[onclick="toggleAuthMode(\'login\')"]').classList.add('active');
+            } else if (mode === 'register') {
+                registerForm.classList.remove('hidden');
+                document.querySelector('[onclick="toggleAuthMode(\'register\')"]').classList.add('active');
+            } else if (mode === 'forgot') {
+                forgotForm.classList.remove('hidden');
+                resetPasswordForm();
+                document.querySelector('[onclick="toggleAuthMode(\'forgot\')"]').classList.add('active');
+            }
+            
+            hideAuthMessage();
+        }
+
+        // Update language
+        function updateLanguage() {
+            const lang = translations[currentLanguage];
+            
+            document.documentElement.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLanguage;
+
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.dataset.key;
+                if (lang[key]) {
+                    element.textContent = lang[key];
+                }
+            });
+
+            if (currentUser) {
+                updateUserInfo();
+                loadAll();
+            }
+        }
+
+        // Show section
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            const targetSection = document.getElementById(sectionName);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            const targetNavLink = document.querySelector(`[data-section="${sectionName}"]`);
+            if (targetNavLink) {
+                targetNavLink.classList.add('active');
+            }
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            
+            const form = document.querySelector(`#${modalId} form`);
+            if (form) {
+                form.reset();
+                
+                // Reset editing state
+                editingItemId = null;
+                editingItemType = null;
+                
+                // Reset modal titles
+                if (modalId === 'orderModal') {
+                    document.querySelector('#orderModal .modal-title').textContent = translations[currentLanguage].addOrder;
+                    document.querySelector('#orderForm button[type="submit"]').textContent = translations[currentLanguage].createOrder;
+                } else if (modalId === 'productModal') {
+                    document.querySelector('#productModal .modal-title').textContent = translations[currentLanguage].addProduct;
+                    document.querySelector('#productForm button[type="submit"]').textContent = translations[currentLanguage].save;
+                } else if (modalId === 'customerModal') {
+                    document.querySelector('#customerModal .modal-title').textContent = translations[currentLanguage].addCustomer;
+                    document.querySelector('#customerForm button[type="submit"]').textContent = translations[currentLanguage].save;
+                }
+            }
+        }
+
+        function openOrderModal(orderId = null) {
+            if (orderId) {
+                // Edit mode
+                const order = orders.find(o => o.id === orderId);
+                if (order) {
+                    editingItemId = orderId;
+                    editingItemType = 'order';
+                    
+                    // Update modal title and button
+                    document.querySelector('#orderModal .modal-title').textContent = translations[currentLanguage].editOrder;
+                    document.querySelector('#orderForm button[type="submit"]').textContent = translations[currentLanguage].updateOrder;
+                    
+                    // Populate form with existing data
+                    document.querySelector('input[name="orderNumber"]').value = order.orderNumber;
+                    document.querySelector('input[name="customerName"]').value = order.customerName;
+                    document.querySelector('input[name="productName"]').value = order.productName;
+                    document.querySelector('input[name="price"]').value = order.total;
+                    document.querySelector('select[name="currency"]').value = order.currency || 'USD';
+                    document.querySelector('select[name="paymentStatus"]').value = order.paymentStatus;
+                    document.querySelector('input[name="paidAmount"]').value = order.paidAmount;
+                    document.querySelector('input[name="remainingAmount"]').value = order.remainingAmount;
+                    document.querySelector('select[name="orderStatus"]').value = order.orderStatus;
+                    document.querySelector('select[name="shippingMethod"]').value = order.shippingMethod || 'standard';
+                    document.querySelector('input[name="orderDate"]').value = order.date;
+                    document.querySelector('textarea[name="orderNotes"]').value = order.notes || '';
+                    
+                    // Update display
+                    document.getElementById('currentOrderNumber').textContent = order.orderNumber;
+                }
+            } else {
+                // Add mode
+                document.querySelector('input[name="orderDate"]').value = new Date().toISOString().split('T')[0];
+                document.querySelector('select[name="currency"]').value = currentCurrency;
+                generateOrderNumber();
+            }
+            
+            openModal('orderModal');
+        }
+
+        function openProductModal(productId = null) {
+            if (productId) {
+                // Edit mode
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    editingItemId = productId;
+                    editingItemType = 'product';
+                    
+                    // Update modal title and button
+                    document.querySelector('#productModal .modal-title').textContent = translations[currentLanguage].editProduct;
+                    document.querySelector('#productForm button[type="submit"]').textContent = translations[currentLanguage].update;
+                    
+                    // Populate form with existing data
+                    document.querySelector('input[name="productName"]').value = product.name;
+                    document.querySelector('input[name="category"]').value = product.category;
+                    document.querySelector('input[name="price"]').value = product.price;
+                    document.querySelector('input[name="stock"]').value = product.stock;
+                    document.querySelector('select[name="currency"]').value = product.currency || 'USD';
+                    document.querySelector('textarea[name="description"]').value = product.description || '';
+                }
+            } else {
+                // Set default currency for new products
+                document.querySelector('select[name="currency"]').value = currentCurrency;
+            }
+            
+            openModal('productModal');
+        }
+
+        function openCustomerModal(customerId = null) {
+            if (customerId) {
+                // Edit mode
+                const customer = customers.find(c => c.id === customerId);
+                if (customer) {
+                    editingItemId = customerId;
+                    editingItemType = 'customer';
+                    
+                    // Update modal title and button
+                    document.querySelector('#customerModal .modal-title').textContent = translations[currentLanguage].editCustomer;
+                    document.querySelector('#customerForm button[type="submit"]').textContent = translations[currentLanguage].update;
+                    
+                    // Populate form with existing data
+                    document.querySelector('input[name="customerName"]').value = customer.name;
+                    document.querySelector('input[name="phone"]').value = customer.phone;
+                    document.querySelector('input[name="email"]').value = customer.email;
+                    document.querySelector('input[name="city"]').value = customer.city || '';
+                    document.querySelector('textarea[name="address"]').value = customer.address || '';
+                }
+            }
+            
+            openModal('customerModal');
+        }
+
+        // Form handlers
+        async function handleOrderSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            const orderNumber = formData.get('orderNumber');
+            const totalPrice = parseFloat(formData.get('price'));
+            const paidAmount = parseFloat(formData.get('paidAmount')) || 0;
+            const remainingAmount = Math.max(0, totalPrice - paidAmount);
+            const selectedCurrency = formData.get('currency');
+            
+            const orderData = {
+                orderNumber: orderNumber,
+                customerName: formData.get('customerName'),
+                productName: formData.get('productName'),
+                total: totalPrice,
+                currency: selectedCurrency,
+                paidAmount: paidAmount,
+                remainingAmount: remainingAmount,
+                paymentStatus: formData.get('paymentStatus'),
+                orderStatus: formData.get('orderStatus'),
+                shippingMethod: formData.get('shippingMethod'),
+                date: formData.get('orderDate') || new Date().toISOString().split('T')[0],
+                notes: formData.get('orderNotes') || '',
+                updatedAt: new Date().toISOString()
+            };
+            
+            if (editingItemId && editingItemType === 'order') {
+                // Update existing order
+                const orderIndex = orders.findIndex(o => o.id === editingItemId);
+                if (orderIndex !== -1) {
+                    orders[orderIndex] = { ...orders[orderIndex], ...orderData };
+                    await updateCloudDoc('orders', editingItemId, orderData);
+                    showAuthMessage('Order updated successfully!', 'success');
+                }
+            } else {
+                // Check if order number already exists for this user
+                if (orders.find(o => o.orderNumber === orderNumber)) {
+                    alert('Order number already exists! Please use a different number.');
+                    return;
+                }
+                
+                // Create new order
+                const newOrderId = 'ord_' + Math.random().toString(36).substr(2, 9);
+                const newOrder = {
+                    id: newOrderId,
+                    ...orderData,
+                    createdBy: currentUser.uid,
+                    createdAt: new Date().toISOString()
+                };
+                
+                orders.push(newOrder);
+                await saveToCloud('orders', newOrderId, newOrder);
+                showAuthMessage('Order created successfully!', 'success');
+            }
+            
+            loadAll();
+            closeModal('orderModal');
+        }
+
+        async function handleProductSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            const productData = {
+                name: formData.get('productName'),
+                category: formData.get('category'),
+                price: parseFloat(formData.get('price')),
+                currency: formData.get('currency'),
+                stock: parseInt(formData.get('stock')),
+                description: formData.get('description'),
+                updatedAt: new Date().toISOString()
+            };
+            
+            if (editingItemId && editingItemType === 'product') {
+                // Update existing product
+                const productIndex = products.findIndex(p => p.id === editingItemId);
+                if (productIndex !== -1) {
+                    products[productIndex] = { ...products[productIndex], ...productData };
+                    await updateCloudDoc('products', editingItemId, productData);
+                    showAuthMessage('Product updated successfully!', 'success');
+                }
+            } else {
+                // Create new product
+                const newProductId = 'prod_' + Math.random().toString(36).substr(2, 9);
+                const newProduct = {
+                    id: newProductId,
+                    ...productData,
+                    createdAt: new Date().toISOString()
+                };
+                
+                products.push(newProduct);
+                await saveToCloud('products', newProductId, newProduct);
+                showAuthMessage('Product added successfully!', 'success');
+            }
+            
+            loadAll();
+            closeModal('productModal');
+        }
+
+        async function handleCustomerSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            const customerData = {
+                name: formData.get('customerName'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                city: formData.get('city'),
+                address: formData.get('address'),
+                updatedAt: new Date().toISOString()
+            };
+            
+            if (editingItemId && editingItemType === 'customer') {
+                // Update existing customer
+                const customerIndex = customers.findIndex(c => c.id === editingItemId);
+                if (customerIndex !== -1) {
+                    customers[customerIndex] = { ...customers[customerIndex], ...customerData };
+                    await updateCloudDoc('customers', editingItemId, customerData);
+                    showAuthMessage('Customer updated successfully!', 'success');
+                }
+            } else {
+                // Create new customer
+                const newCustomerId = 'cust_' + Math.random().toString(36).substr(2, 9);
+                const newCustomer = {
+                    id: newCustomerId,
+                    ...customerData,
+                    createdAt: new Date().toISOString()
+                };
+                
+                customers.push(newCustomer);
+                await saveToCloud('customers', newCustomerId, newCustomer);
+                showAuthMessage('Customer added successfully!', 'success');
+            }
+            
+            loadAll();
+            closeModal('customerModal');
+        }
+
+        // CRUD operations
+        function viewOrder(id) {
+            const order = orders.find(o => o.id === id);
+            if (order) {
+                const lang = translations[currentLanguage];
+                const convertedTotal = convertCurrency(order.total || 0, order.currency || 'USD', currentCurrency);
+                const convertedPaid = convertCurrency(order.paidAmount || 0, order.currency || 'USD', currentCurrency);
+                const convertedRemaining = convertCurrency(order.remainingAmount || 0, order.currency || 'USD', currentCurrency);
+                
+                alert(`${order.orderNumber}\n${lang.customer}: ${order.customerName}\n${lang.product}: ${order.productName}\n${lang.total}: ${formatCurrency(convertedTotal)}\n${lang.paymentStatus}: ${lang[order.paymentStatus]}\n${lang.orderStatus}: ${lang[order.orderStatus]}\n${lang.shippingMethod}: ${lang[order.shippingMethod + 'Shipping']}\n${lang.paidAmount}: ${formatCurrency(convertedPaid)}\n${lang.remainingAmount}: ${formatCurrency(convertedRemaining)}`);
+            }
+        }
+
+        function editOrder(id) {
+            openOrderModal(id);
+        }
+
+        async function deleteOrder(id) {
+            if (confirm('Delete this order?')) {
+                orders = orders.filter(o => o.id !== id);
+                await deleteFromCloud('orders', id);
+                loadAll();
+                showAuthMessage('Order deleted successfully!', 'success');
+            }
+        }
+
+        function editProduct(id) {
+            openProductModal(id);
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('Delete this product?')) {
+                products = products.filter(p => p.id !== id);
+                await deleteFromCloud('products', id);
+                loadAll();
+                showAuthMessage('Product deleted successfully!', 'success');
+            }
+        }
+
+        function editCustomer(id) {
+            openCustomerModal(id);
+        }
+
+        async function deleteCustomer(id) {
+            if (confirm('Delete this customer?')) {
+                customers = customers.filter(c => c.id !== id);
+                await deleteFromCloud('customers', id);
+                loadAll();
+                showAuthMessage('Customer deleted successfully!', 'success');
+            }
+        }
+
+        // Show auth message
+        function showAuthMessage(message, type) {
+            const messageDiv = document.getElementById('authMessage');
+            if (messageDiv) {
+                messageDiv.textContent = message;
+                messageDiv.className = `alert alert-${type}`;
+                messageDiv.style.display = 'block';
+                
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function hideAuthMessage() {
+            const messageDiv = document.getElementById('authMessage');
+            if (messageDiv) {
+                messageDiv.style.display = 'none';
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing cloud-based app...');
+            initApp();
+        });
+    </script>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyD-mHbYOPVzdD-jWjeqaddIPE-WWQArf4k",
+    authDomain: "my-app-60b8e.firebaseapp.com",
+    projectId: "my-app-60b8e",
+    storageBucket: "my-app-60b8e.firebasestorage.app",
+    messagingSenderId: "863616396186",
+    appId: "1:863616396186:web:343ec3e48e6aa94d7c2823",
+    measurementId: "G-TY4YELXWLC"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script></body>
+</html>
